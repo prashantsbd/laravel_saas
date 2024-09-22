@@ -484,6 +484,10 @@
             position: 'bl',
             onSelect: (instance, date) => {
                 dp2.setMin(date);
+                if(dp2.dateSelected){
+                    var daysGap = (dp2.dateSelected - date)/86400000;
+                    $('#days_count').val(daysGap);
+                }
             },
             ...datepickerConfig
         });
@@ -492,6 +496,10 @@
             position: 'bl',
             onSelect: (instance, date) => {
                 dp1.setMax(date);
+                if(dp1.dateSelected){
+                    var daysGap = (date - dp1.dateSelected)/86400000;
+                    $('#days_count').val(daysGap);
+                }
             },
             ...datepickerConfig
         });
