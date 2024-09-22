@@ -42,7 +42,7 @@
                                             :fieldValue="($project ? (($project->deadline) ?$project->deadline->format(company()->date_format) : '') : '')"/>
                     </div>
 
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-4" id="days_countBox">
                         <x-forms.text fieldId="days_count" fieldRequired="true"
                                             :fieldLabel="__('modules.projects.daysCount')" fieldName="days_count"
                                             :fieldPlaceholder="__('placeholders.number')" fieldReadOnly="true"/>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-4" id="set_days_countBox">
                         <div class="form-group">
                             <div class="mt-5 d-flex">
                                 <x-forms.checkbox fieldId="set_days_count"
@@ -490,8 +490,12 @@
             const check = $('#without_deadline').is(":checked") ? true : false;
             if (check == true) {
                 $('#deadlineBox').hide();
+                $('#days_countBox').hide();
+                $('#set_days_countBox').hide();
             } else {
                 $('#deadlineBox').show();
+                $('#days_countBox').show();
+                $('#set_days_countBox').show();
             }
         });
 
