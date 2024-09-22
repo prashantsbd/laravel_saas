@@ -369,6 +369,20 @@
             }
         });
 
+        $('#set_days_count').change(function() {
+            if (this.checked) {
+                $('#days_count').attr('readonly', false);
+                $('#deadline').attr('readonly', true);
+                dp2.respectDisabledReadOnly = true;
+                dp2.disabled = true;
+            }else{
+                $('#days_count').attr('readonly', true);
+                $('#deadline').attr('readonly', false);
+                dp2.respectDisabledReadOnly = false;
+                dp2.disabled = false;
+            }
+        })
+
         if (add_project_files == "all") {
 
             let checkSize = true;
