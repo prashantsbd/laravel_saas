@@ -393,6 +393,8 @@ return array(
         'selectPayment' => 'The payment gateway is required when payment status is Enable',
         'allProject' => 'All Projects',
         'withoutDeadline' => 'There is no project deadline',
+        'daysCount' => 'Number of days',
+        'setDaysCount' => 'Set number of days',
         'pause' => 'Pause',
         'resume' => 'Resume',
         'cancel' => 'Cancel',

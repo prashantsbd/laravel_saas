@@ -39,7 +39,13 @@
                         <x-forms.datepicker fieldId="deadline" fieldRequired="true"
                                             :fieldLabel="__('modules.projects.deadline')" fieldName="deadline"
                                             :fieldPlaceholder="__('placeholders.date')"
-                                            :fieldValue="($project ? (($project->deadline) ?$project->deadline->format(company()->date_format) : '') : '')" />
+                                            :fieldValue="($project ? (($project->deadline) ?$project->deadline->format(company()->date_format) : '') : '')"/>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <x-forms.text fieldId="days_count" fieldRequired="true"
+                                            :fieldLabel="__('modules.projects.daysCount')" fieldName="days_count"
+                                            :fieldPlaceholder="__('placeholders.number')" fieldReadOnly="true"/>
                     </div>
 
                     <div class="col-md-6 col-lg-4">
@@ -47,6 +53,15 @@
                             <div class="mt-5 d-flex">
                                 <x-forms.checkbox fieldId="without_deadline"
                                 :checked="($project && $project->deadline == null) ? true : false" :fieldLabel="__('modules.projects.withoutDeadline')"  fieldName="without_deadline"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="form-group">
+                            <div class="mt-5 d-flex">
+                                <x-forms.checkbox fieldId="set_days_count"
+                                :checked="($project && $project->deadline == null) ? true : false" :fieldLabel="__('modules.projects.setDaysCount')"  fieldName="set_days_count"/>
                             </div>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ return array(
     'designation' => 'e.g. Team Lead',
     'department' => 'e.g. Human Resource',
     'date' => 'Select Date',
+    'number' => 'e.g. 8',
     'address' => 'e.g. 132, My Street, Kingston, New York 12401',
     'skills' => 'e.g. communication, ReactJS',
     'project' => 'Write a project name',
