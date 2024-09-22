@@ -375,11 +375,15 @@
                 $('#deadline').prop('readonly', true);
                 dp2.respectDisabledReadOnly = true;
                 dp2.disabled = true;
+                dp1.setMax();
+                dp2.setMin();
             }else{
                 $('#days_count').prop('readonly', true);
                 $('#deadline').prop('readonly', false);
                 dp2.respectDisabledReadOnly = false;
                 dp2.disabled = false;
+                dp2.setDate();
+                dp2.setMin(dp1.dateSelected);
             }
         })
 
@@ -483,6 +487,14 @@
         const dp1 = datepicker('#start_date', {
             position: 'bl',
             onSelect: (instance, date) => {
+                if($('#set_days_count').is(":checked")){
+                    if($('#days_count').val()){
+                        var endDate = new Date(date);
+                        var setDateGap = $('#days_count').val();
+                        endDate.setDate(endDate.getDate() + Number(setDateGap));
+                        dp2.setDate(endDate);
+                    }
+                }
                 dp2.setMin(date);
                 if(dp2.dateSelected){
                     var daysGap = (dp2.dateSelected - date)/86400000;
