@@ -384,6 +384,7 @@
             if(/[^0-9]/.test(daysInput)){
                 alert('Please enter number only');
                 $(this).val('');
+                dp2.setDate();
             }else{
                 if(dp1.dateSelected){
                     setDeadline();
