@@ -382,8 +382,19 @@
                 $('#deadline').prop('readonly', false);
                 dp2.respectDisabledReadOnly = false;
                 dp2.disabled = false;
-                dp2.setDate();
                 dp2.setMin(dp1.dateSelected);
+            }
+        })
+
+        $('#days_count').on('input', function() {
+            var daysInput = $(this).val();
+            if(/[^0-9]/.test(daysInput)){
+                alert('Please enter number only');
+                $(this).val('');
+            }else{
+                if(dp1.dateSelected){
+                    setDeadline();
+                }
             }
         })
 
@@ -489,10 +500,7 @@
             onSelect: (instance, date) => {
                 if($('#set_days_count').is(":checked")){
                     if($('#days_count').val()){
-                        var endDate = new Date(date);
-                        var setDateGap = $('#days_count').val();
-                        endDate.setDate(endDate.getDate() + Number(setDateGap));
-                        dp2.setDate(endDate);
+                        setDeadline();
                     }
                 }
                 dp2.setMin(date);
@@ -515,6 +523,17 @@
             },
             ...datepickerConfig
         });
+
+        function setDeadline() {
+            try{
+                var endDate = new Date(dp1.dateSelected);
+                var setDateGap = $('#days_count').val();
+                endDate.setDate(endDate.getDate() + Number(setDateGap));
+                dp2.setDate(endDate);
+            } catch(error) {
+                console.log('Error occured: ',error);
+            }
+        }
 
         @if ($project && $project->deadline == null)
             $('#deadlineBox').hide();
