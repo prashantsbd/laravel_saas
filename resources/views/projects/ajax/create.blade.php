@@ -360,15 +360,6 @@
             });
         });
 
-        $('#without_deadline').click(function() {
-            var check = $('#without_deadline').is(":checked") ? true : false;
-            if (check == true) {
-                $('#deadlineBox').hide();
-            } else {
-                $('#deadlineBox').show();
-            }
-        });
-
         $('#set_days_count').change(function() {
             if (this.checked) {
                 $('#days_count').prop('readonly', false);
@@ -377,6 +368,8 @@
                 dp2.disabled = true;
                 dp1.setMax();
                 dp2.setMin();
+                dp2.setDate();
+                $('#days_count').val('');
             }else{
                 $('#days_count').prop('readonly', true);
                 $('#deadline').prop('readonly', false);
