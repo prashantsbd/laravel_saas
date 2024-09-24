@@ -98,7 +98,7 @@
                     <div class="col-md-5 col-lg-3">
                         <x-forms.datepicker fieldId="task_start_date" fieldRequired="true"
                                             :fieldLabel="__('modules.projects.startDate')" fieldName="start_date"
-                                            :fieldValue="(($task) ? $task->start_date->format(company()->date_format) : now(company()->timezone)->translatedFormat(company()->date_format))"
+                                            :fieldValue="(($task) ? $task->start_date->format(company()->date_format) : '')"
                                             :fieldPlaceholder="__('placeholders.date')"/>
                     </div>
 
@@ -106,15 +106,28 @@
                          @if($task && is_null($task->due_date)) style="display: none" @endif>
                         <x-forms.datepicker fieldId="due_date" fieldRequired="true" :fieldLabel="__('app.dueDate')"
                                 fieldName="due_date" :fieldPlaceholder="__('placeholders.date')"
-                                :fieldValue="(($task && $task->due_date) ? $task->due_date->format(company()->date_format) : now(company()->timezone)->translatedFormat(company()->date_format))"/>
+                                :fieldValue="(($task && $task->due_date) ? $task->due_date->format(company()->date_format) : '')"/>
                     </div>
+
+                    <div class="col-md-6 col-lg-4" id="days_countBox">
+                        <x-forms.text fieldId="days_count" fieldRequired="true"
+                                            :fieldLabel="__('modules.projects.daysCount')" fieldName="days_count"
+                                            :fieldPlaceholder="__('placeholders.number')" fieldReadOnly="true"/>
+                    </div>
+                    
                     <div class="col-md-2 col-lg-2 pt-5">
                         <x-forms.checkbox class="mr-0 mr-lg-2 mr-md-2" :checked="$task ? is_null($task->due_date) : ''"
                                           :fieldLabel="__('app.withoutDueDate')"
                                           fieldName="without_duedate" fieldId="without_duedate" fieldValue="yes"/>
                     </div>
 
-                    <div class="col-md-12 col-lg-12">
+                    <div class="col-md-6 col-lg-4" id="set_days_countBox">
+                        <div class="form-group">
+                            <div class="mt-5 d-flex">
+                                <x-forms.checkbox fieldId="set_days_count"
+                                :checked="false" :fieldLabel="__('modules.projects.setDaysCount')"  fieldName="set_days_count"/>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-12 col-lg-8">
@@ -559,39 +572,13 @@
         const dp1 = datepicker('#task_start_date', {
             position: 'bl',
             onSelect: (instance, date) => {
-                if (typeof dp2.dateSelected !== 'undefined' && dp2.dateSelected.getTime() < date.getTime()) {
-                    dp2.setDate(date, true)
-                }
-                if (typeof dp2.dateSelected === 'undefined') {
-                    dp2.setDate(date, true)
+                if($('#set_days_count').is(":checked")){
+                    if($('#days_count').val()){
+                        setDueDate();
+                    }
                 }
                 dp2.setMin(date);
-
-                var startDate = $('#task_start_date').val();
-                var dueDate = $('#due_date').val();
-                var userId = $('#selectAssignee').val();
-
-                $.easyAjax({
-                    url:"{{ route('tasks.checkLeaves')}}",
-                    type:'GET',
-                    data:{due_date:dueDate, start_date:startDate, user_id:userId},
-                    success:function(response) {
-                    if (response.data === null) {
-                        $(".show-leave").html('');
-                        return;
-                    }
-                    var rData = [];
-                    var leaveData = [];
-                        rData = response.data;
-                        $.each(rData, function(index, value) {
-                            var data = '';
-                            data = index + " {{ __('modules.tasks.leaveOn') }} "  + value + "\n";
-                            leaveData.push(data);
-                            var label = '<label id="leave-date"> {{ __("modules.tasks.leaveMessage") }} <i class="fa fa-question-circle" data-toggle="tooltip"  data-original-title="'+leaveData+'" id="leave-tooltip"></i></label>'
-                            $(".show-leave").html(label);
-                        });
-                }
-                });
+                setEmployeeLeave();
             },
             ...datepickerConfig
 
@@ -600,10 +587,22 @@
         const dp2 = datepicker('#due_date', {
             position: 'bl',
             onSelect: (instance, date) => {
+                if(dp1.dateSelected){
+                    var daysGap = (date - dp1.dateSelected)/86400000;
+                    $('#days_count').val(daysGap);
+                }
                 dp1.setMax(date);
+                setEmployeeLeave();
 
-                var dueDate = $('#due_date').val();
+            },
+            ...datepickerConfig
+
+        });
+
+        function setEmployeeLeave() {
+            if(dp1.dateSelected && dp2.dateSelected){
                 var startDate = $('#task_start_date').val();
+                var dueDate = $('#due_date').val();
                 var userId = $('#selectAssignee').val();
 
                 $.easyAjax({
@@ -611,13 +610,12 @@
                     type:'GET',
                     data:{start_date:startDate, due_date:dueDate, user_id:userId},
                     success:function(response) {
-                    if (response.data === null) {
-                        $(".show-leave").html('');
-                        return;
-                    }
-
-                    var rData = [];
-                    var leaveData = [];
+                        if (response.data === null) {
+                            $(".show-leave").html('');
+                            return;
+                        }
+                        var rData = [];
+                        var leaveData = [];
                         rData = response.data;
                         $.each(rData, function(index, value) {
                             var data = '';
@@ -626,13 +624,21 @@
                             var label = '<label id="leave-date"> {{ __("modules.tasks.leaveMessage") }} <i class="fa fa-question-circle" data-toggle="tooltip"  data-original-title="'+leaveData+'" id="leave-tooltip"></i></label>'
                             $(".show-leave").html(label);
                         });
-                }
+                    }
                 });
+            }
+        }
 
-            },
-            ...datepickerConfig
-
-        });
+        function setDueDate() {
+            try{
+                var dueDate = new Date(dp1.dateSelected);
+                var setDateGap = $('#days_count').val();
+                dueDate.setDate(dueDate.getDate() + Number(setDateGap));
+                dp2.setDate(dueDate);
+            } catch(error) {
+                console.log('Error occured: ',error);
+            }
+        }
 
         $('#selectAssignee').change(function(){
             var dueDate = $('#due_date').val();
@@ -832,9 +838,49 @@
             $('#selectAssignee').selectpicker('refresh');
         });
 
-        $('#without_duedate').click(function () {
-            $('.dueDateBox').toggle();
-        });
+        $('#without_duedate').change(function() {
+            if (this.checked) {
+                $('.dueDateBox').hide();
+                $('#days_countBox').hide();
+                $('#set_days_countBox').hide();
+            } else {
+                $('.dueDateBox').show();
+                $('#days_countBox').show();
+                $('#set_days_countBox').show();
+            }
+        })
+
+        $('#set_days_count').change(function() {
+            if (this.checked) {
+                $('#days_count').prop('readonly', false);
+                $('#due_date').prop('readonly', true);
+                dp2.respectDisabledReadOnly = true;
+                dp2.disabled = true;
+                dp1.setMax();
+                dp2.setMin();
+                dp2.setDate();
+                $('#days_count').val('');
+            }else{
+                $('#days_count').prop('readonly', true);
+                $('#due_date').prop('readonly', false);
+                dp2.respectDisabledReadOnly = false;
+                dp2.disabled = false;
+                dp2.setMin(dp1.dateSelected);
+            }
+        })
+
+        $('#days_count').on('input', function() {
+            var daysInput = $(this).val();
+            if(/[^0-9]/.test(daysInput)){
+                alert('Please enter number only');
+                $(this).val('');
+                dp2.setDate();
+            }else{
+                if(dp1.dateSelected){
+                    setDueDate();
+                }
+            }
+        })
 
         $('#create_task_category').click(function () {
             const url = "{{ route('taskCategory.create') }}";

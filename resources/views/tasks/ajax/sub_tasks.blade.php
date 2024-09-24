@@ -45,6 +45,21 @@
                                             :fieldPlaceholder="__('placeholders.date')"/>
                     </div>
 
+                    <div class="col-md-6 col-lg-4" id="days_countBox">
+                        <x-forms.text fieldId="days_count"
+                                            :fieldLabel="__('modules.projects.daysCount')" fieldName="days_count"
+                                            :fieldPlaceholder="__('placeholders.number')" fieldReadOnly="true"/>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4" id="set_days_countBox">
+                        <div class="form-group">
+                            <div class="mt-5 d-flex">
+                                <x-forms.checkbox fieldId="set_days_count"
+                                :fieldLabel="__('modules.projects.setDaysCount')"  fieldName="set_days_count"/>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-md-4">
                         <div class="form-group my-3">
                             <x-forms.label fieldId="subTaskAssignee"
@@ -309,15 +324,76 @@
             });
         }
 
-        datepicker('#sub_task_start_date', {
+        const dp1 = datepicker('#sub_task_start_date', {
             position: 'bl',
+            onSelect: (instance, date) => {
+                if($('#set_days_count').is(":checked")){
+                    if($('#days_count').val()){
+                        setSubtaskDue();
+                    }
+                }
+                dp2.setMin(date);
+            },
             ...datepickerConfig
+
         });
 
-        datepicker('#sub_task_due_date', {
+        const dp2 = datepicker('#sub_task_due_date', {
             position: 'bl',
+            onSelect: (instance, date) => {
+                if(dp1.dateSelected){
+                    var daysGap = (date - dp1.dateSelected)/86400000;
+                    $('#days_count').val(daysGap);
+                }
+                dp1.setMax(date);
+
+            },
             ...datepickerConfig
+
         });
+
+        $('#set_days_count').change(function() {
+            if (this.checked) {
+                $('#days_count').prop('readonly', false);
+                $('#sub_task_due_date').prop('readonly', true);
+                dp2.respectDisabledReadOnly = true;
+                dp2.disabled = true;
+                dp1.setMax();
+                dp2.setMin();
+                dp2.setDate();
+                $('#days_count').val('');
+            }else{
+                $('#days_count').prop('readonly', true);
+                $('#sub_task_due_date').prop('readonly', false);
+                dp2.respectDisabledReadOnly = false;
+                dp2.disabled = false;
+                dp2.setMin(dp1.dateSelected);
+            }
+        })
+
+        $('#days_count').on('input', function() {
+            var daysInput = $(this).val();
+            if(/[^0-9]/.test(daysInput)){
+                alert('Please enter number only');
+                $(this).val('');
+                dp2.setDate();
+            }else{
+                if(dp1.dateSelected){
+                    setSubtaskDue();
+                }
+            }
+        })
+
+        function setSubtaskDue() {
+            try{
+                var dueDate = new Date(dp1.dateSelected);
+                var setDateGap = $('#days_count').val();
+                dueDate.setDate(dueDate.getDate() + Number(setDateGap));
+                dp2.setDate(dueDate);
+            } catch(error) {
+                console.log('Error occured: ',error);
+            }
+        }
 
         $('#save-subtask').click(function () {
 

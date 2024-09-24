@@ -58,6 +58,7 @@ class SubTaskController extends AccountBaseController
 
         $subTask->start_date = ($request->start_date != '') ? companyToYmd($request->start_date) : null;
         $subTask->due_date = ($request->due_date != '') ? companyToYmd($request->due_date) : null;
+        $subTask->days_count = ($request->days_count != '') ? $request->due_date : null;
 
         $subTask->assigned_to = $request->user_id ? $request->user_id : null;
 
