@@ -594,6 +594,7 @@ class TaskController extends AccountBaseController
                 || ($editTaskPermission == 'both' && (in_array('client', user_roles()) && ($this->task->project && ($this->task->project->client_id == user()->id)) || $this->task->added_by == user()->id))
             )
         );
+        DB::beginTransaction();
 
         $getCustomFieldGroupsWithFields = $this->task->getCustomFieldGroupsWithFields();
 
@@ -775,8 +776,11 @@ class TaskController extends AccountBaseController
             $projectLastTaskCount = Task::projectTaskCount($project->id);
             $task->task_short_code = $project->project_short_code . '-' . $this->getTaskShortCode($project->project_short_code, $projectLastTaskCount);
         }
-
         $task->save();
+        if(!$this->taskChainShift($task)){
+            return Reply::error(__('messages.failedChainTaskDateUpdate'));
+        }
+        // $task->save();
 
         // save labels
         $task->labels()->sync($request->task_labels);
@@ -798,6 +802,25 @@ class TaskController extends AccountBaseController
         }
 
         return Reply::successWithData(__('messages.updateSuccess'), ['redirectUrl' => route('tasks.show', $id)]);
+    }
+
+    public function taskChainShift(Task $object){
+        try{
+            $chainTasks = Task::select(['id', 'start_date', 'due_date', 'days_count'])
+            ->where('dependent_task_id', $object->id)
+            ->get();
+            foreach($chainTasks as $chainTask){
+                if($object->due_date->greaterThan($chainTask->start_date)){
+                    $chainTask->start_date = $object->due_date;
+                    $chainTask->due_date = $chainTask->start_date->addDays($chainTask->days_count);
+                    $chainTask->saveQuietly();
+                    $this->taskChainShift($chainTask);
+                }
+            }
+            return true;
+        }catch(\Exception $e){
+            return false;
+        }
     }
 
     /**
