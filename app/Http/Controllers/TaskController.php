@@ -715,6 +715,7 @@ class TaskController extends AccountBaseController
         $task->description = trim_editor($request->description);
         $task->start_date = companyToYmd($request->start_date);
         $task->due_date = $dueDate;
+        $task->days_count = ($request->has('without_duedate')) ? null : $request->days_count;
         $task->task_category_id = $request->category_id;
         $task->priority = $request->priority;
 

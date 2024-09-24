@@ -578,6 +578,10 @@
                     }
                 }
                 dp2.setMin(date);
+                if(dp2.dateSelected){
+                    var daysGap = (dp2.dateSelected - date)/86400000;
+                    $('#days_count').val(daysGap);
+                }
                 setEmployeeLeave();
             },
             ...datepickerConfig
