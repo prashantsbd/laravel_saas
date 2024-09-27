@@ -438,7 +438,6 @@ class TaskController extends AccountBaseController
                 $task->task_short_code = $projectLastTaskCount + 1;
             }
         }
-
         $task->save();
 
         // Save labels
@@ -780,7 +779,6 @@ class TaskController extends AccountBaseController
         if(!$this->taskChainShift($task)){
             return Reply::error(__('messages.failedChainTaskDateUpdate'));
         }
-        // $task->save();
 
         // save labels
         $task->labels()->sync($request->task_labels);
