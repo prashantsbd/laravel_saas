@@ -371,13 +371,22 @@ $viewTaskCategoryPermission = user()->permission('view_task_category');
                                     fieldId="dependent-task" :checked="$task->dependent_task_id" />
                             </div>
                         </div>
-
-                        <div class="{{ !$task->dependent_task_id ? 'd-none' : '' }}" id="dependent-fields">
-                            <x-forms.select fieldId="dependent_task_id" :fieldLabel="__('modules.tasks.dependentTask')"
-                                fieldName="dependent_task_id" search="true">
+                        <div class="{{ !$dependent_tasks ? 'd-none' : '' }}" id="dependent-fields">
+                            <x-forms.select fieldId="dependent_task_id" multiple :fieldLabel="__('modules.tasks.dependentTask')"
+                                fieldName="dependent_task_id[]" search="true">
                                 <option value="">--</option>
                                 @foreach ($allTasks as $item)
-                                    <option @selected($item->id == $task->dependent_task_id) value="{{ $item->id }}">
+                                    @php
+                                        $taskSelected = '';
+                                    @endphp
+                                    @foreach ($dependent_tasks as $dependent_task_id)
+                                        @if ($item->id == $dependent_task_id)
+                                            @php
+                                                $taskSelected = 'selected';
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                    <option @selected($taskSelected == 'selected') value="{{ $item->id }}">
                                         {{ $item->heading }}
                                         (@lang('app.dueDate'):
                                         @if(!is_null($item->due_date))

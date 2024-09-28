@@ -199,6 +199,16 @@ class Task extends BaseModel
     {
         return $this->belongsToMany(User::class, 'task_users')->using(TaskUser::class);
     }
+    // store task, taskcontroller, mysql schema, tasks/ajax/(edit,create,update), homecontroller, projectcontroller 
+    public function precedingTasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_task_dependencies', 'dependent_task_id', 'preceding_task_id')->withoutGlobalScope(ActiveScope::class)->using(TaskTaskDependency::class);
+    }
+
+    public function dependentTasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_task_dependencies', 'preceding_task_id', 'dependent_task_id')->withoutGlobalScope(ActiveScope::class)->using(TaskTaskDependency::class);
+    }
 
     public function labels(): BelongsToMany
     {

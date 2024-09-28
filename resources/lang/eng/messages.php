@@ -285,7 +285,6 @@ return array(
     'consentOptOut' => 'Consent Opt Out Successfully.',
     'inviteInfo' => 'Employees will receive an email to log in and update their profile through the self-service portal.',
     'taskDependentDate' => 'Dependent task due date cannot be in future.',
-    'failedChainTaskDateUpdate' => 'Unable to update date of task that depends on this task',
     'assignClientFirst' => 'You need to assign a client to the project.',
     'invalidOrInactiveAccount' => 'Email not found or account is inactive. Please check your email.',
     'viewKey' => 'Click Here to View Key',

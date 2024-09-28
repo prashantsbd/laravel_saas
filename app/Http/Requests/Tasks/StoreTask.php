@@ -80,9 +80,24 @@ class StoreTask extends CoreRequest
             $rules['start_date'] = 'required|date_format:"' . $setting->date_format;
         }
 
+        $latestDueDate = null;
         if ($this->has('dependent') && $this->dependent_task_id != '') {
-            $dependentTask = Task::findOrFail($this->dependent_task_id);
-            $rules['start_date'] = 'required|date_format:"' . $setting->date_format . '"|after_or_equal:"' . $dependentTask->due_date->format($setting->date_format) . '"';
+            if (is_array($this->dependent_task_id)) {
+                foreach ($this->dependent_task_id as $dependentTaskId) {
+                    $dependentTask = Task::findOrFail($dependentTaskId);
+        
+                    if ($latestDueDate === null || $dependentTask->due_date->gt($latestDueDate)) {
+                        $latestDueDate = $dependentTask->due_date;
+                    }
+                }
+        
+                if ($latestDueDate) {
+                    $rules['start_date'] = 'required|date_format:"' . $setting->date_format . '"|after_or_equal:"' . $latestDueDate->format($setting->date_format) . '"';
+                }
+            }else{
+                $dependentTask = Task::findOrFail($this->dependent_task_id);
+                $rules['start_date'] = 'required|date_format:"' . $setting->date_format . '"|after_or_equal:"' . $dependentTask->due_date->format($setting->date_format) . '"';
+            }
         }
 
         $rules['user_id.0'] = 'required_with:is_private';

@@ -169,6 +169,13 @@ class TaskObserver
 
             }
 
+            // sync task task dependency
+            if (!empty(request()->dependent_task_id)) {
+
+                $task->precedingTasks()->sync(request()->dependent_task_id);
+
+            }
+
         }
     }
 
@@ -292,6 +299,7 @@ class TaskObserver
                     event(new TaskEvent($task, $task->users, 'TaskUpdated'));
                 }
             }
+            $this->taskChainShift($task);
         }
 
         /* Add/Update google calendar event */
@@ -397,6 +405,18 @@ class TaskObserver
         if (!is_null($task->project_id)) {
             // Calculate project progress if enabled
             $this->calculateProjectProgress($task->project_id);
+        }
+    }
+
+    private function taskChainShift(Task $object){
+        $chainTasks = $object->dependentTasks;
+        foreach($chainTasks as $chainTask){
+            if($object->due_date->greaterThan($chainTask->start_date)){
+                $chainTask->start_date = $object->due_date;
+                $chainTask->due_date = $chainTask->start_date->addDays($chainTask->days_count);
+                $chainTask->saveQuietly();
+                $this->taskChainShift($chainTask);
+            }
         }
     }
 

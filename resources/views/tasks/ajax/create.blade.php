@@ -384,9 +384,9 @@
                             </div>
 
                             <div class="d-none" id="dependent-fields">
-                                <x-forms.select fieldId="dependent_task_id"
+                                <x-forms.select fieldId="dependent_task_id" multiple
                                                 :fieldLabel="__('modules.tasks.dependentTask')"
-                                                fieldName="dependent_task_id" search="true">
+                                                fieldName="dependent_task_id[]" search="true">
                                     <option value="">--</option>
                                     @if ($projectID)
                                         @foreach ($dependantTasks as $dependantTask)

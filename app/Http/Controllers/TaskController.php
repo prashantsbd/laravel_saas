@@ -396,14 +396,10 @@ class TaskController extends AccountBaseController
         $task->board_column_id = $taskBoardColumn->id;
 
         if ($request->has('dependent') && $request->has('dependent_task_id') && $request->dependent_task_id != '') {
-            $dependentTask = Task::findOrFail($request->dependent_task_id);
-
-            if (!is_null($dependentTask->due_date) && !is_null($dueDate) && $dependentTask->due_date->greaterThan($dueDate)) {
-                /* @phpstan-ignore-line */
-                return Reply::error(__('messages.taskDependentDate'));
+            $dependentTask = Task::findOrFail($request->dependent_task_id[0]);
+            if($dependentTask){
+                $task->dependent_task_id = $request->dependent_task_id[0];
             }
-
-            $task->dependent_task_id = $request->dependent_task_id;
         }
 
         $task->is_private = $request->has('is_private') ? 1 : 0;
@@ -581,7 +577,8 @@ class TaskController extends AccountBaseController
     public function edit($id)
     {
         $editTaskPermission = user()->permission('edit_tasks');
-        $this->task = Task::with('users', 'label', 'project',)->findOrFail($id)->withCustomFields();
+        $this->task = Task::with('users', 'label', 'project', 'precedingTasks')->findOrFail($id)->withCustomFields();
+        $this->dependent_tasks = $this->task->precedingTasks->pluck('id')->toArray();
         $this->taskUsers = $taskUsers = $this->task->users->pluck('id')->toArray();
         abort_403(
             !($editTaskPermission == 'all'
@@ -733,7 +730,6 @@ class TaskController extends AccountBaseController
             }
         }
 
-        $task->dependent_task_id = $request->has('dependent') && $request->has('dependent_task_id') && $request->dependent_task_id != '' ? $request->dependent_task_id : null;
         $task->is_private = $request->has('is_private') ? 1 : 0;
         $task->billable = $request->has('billable') && $request->billable ? 1 : 0;
         $task->estimate_hours = $request->estimate_hours;
@@ -751,11 +747,9 @@ class TaskController extends AccountBaseController
         if ($request->has('dependent') && $request->has('dependent_task_id') && $request->dependent_task_id != '') {
             $dependentTask = Task::findOrFail($request->dependent_task_id);
 
-            if (!is_null($dependentTask->due_date) && !is_null($dueDate) && $dependentTask->due_date->greaterThan($dueDate)) {
-                return Reply::error(__('messages.taskDependentDate'));
-            }
-
-            $task->dependent_task_id = $request->dependent_task_id;
+            $task->dependent_task_id = $dependentTask ? $request->dependent_task_id[0] : null;
+        }else{
+            $task->dependent_task_id = null;
         }
 
         // Add repeated task
@@ -776,9 +770,6 @@ class TaskController extends AccountBaseController
             $task->task_short_code = $project->project_short_code . '-' . $this->getTaskShortCode($project->project_short_code, $projectLastTaskCount);
         }
         $task->save();
-        if(!$this->taskChainShift($task)){
-            return Reply::error(__('messages.failedChainTaskDateUpdate'));
-        }
 
         // save labels
         $task->labels()->sync($request->task_labels);
@@ -790,6 +781,9 @@ class TaskController extends AccountBaseController
 
         // Sync task users
         $task->users()->sync($request->user_id);
+        
+        // sync task task dependency
+        $task->precedingTasks()->sync($request->dependent_task_id);
 
         if(!empty($request->user_id)){
             $newlyAssignedUserIds = array_diff($request->user_id, $taskUsers);
@@ -802,24 +796,6 @@ class TaskController extends AccountBaseController
         return Reply::successWithData(__('messages.updateSuccess'), ['redirectUrl' => route('tasks.show', $id)]);
     }
 
-    public function taskChainShift(Task $object){
-        try{
-            $chainTasks = Task::select(['id', 'start_date', 'due_date', 'days_count'])
-            ->where('dependent_task_id', $object->id)
-            ->get();
-            foreach($chainTasks as $chainTask){
-                if($object->due_date->greaterThan($chainTask->start_date)){
-                    $chainTask->start_date = $object->due_date;
-                    $chainTask->due_date = $chainTask->start_date->addDays($chainTask->days_count);
-                    $chainTask->saveQuietly();
-                    $this->taskChainShift($chainTask);
-                }
-            }
-            return true;
-        }catch(\Exception $e){
-            return false;
-        }
-    }
 
     /**
      * @param $projectShortCode
