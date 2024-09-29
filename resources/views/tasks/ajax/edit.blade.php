@@ -153,6 +153,42 @@ $viewTaskCategoryPermission = user()->permission('view_task_category');
                         @endif
                     </div>
 
+                    <div class="col-md-6">
+                        <div class="form-group my-3">
+                            <table class="table table-bordered" id="work-hours-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee Name</th>
+                                        <th>Estimated Work Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="work-hours-body">
+                                    @foreach ($task->users as $item)
+                                        <tr id="row-{{ $item->id }}">
+                                            <td>
+                                                {{ $item->name }}
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $exp_work_hours = '';
+                                                @endphp
+                                                @foreach ($usersWorkHrs as $hrsPerUser)
+                                                    @if ($hrsPerUser->user_id == $item->id)
+                                                        @php
+                                                            $exp_work_hours = $hrsPerUser->exp_work_hours;
+                                                        @endphp
+                                                    @endif
+                                                @endforeach
+                                                <input type="number" class="form-control" name="work_hours[{{ $item->id }}]" 
+                                                    placeholder="(Optional)" required value={{ $exp_work_hours }}>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="col-md-12">
                         <div class="form-group my-3">
                             <x-forms.label fieldId="description" :fieldLabel="__('app.description')">
@@ -631,6 +667,7 @@ $viewTaskCategoryPermission = user()->permission('view_task_category');
             }
         }
 
+        let previousSelection = $('#selectAssignee').val();
         $('#selectAssignee').change(function(){
             var dueDate = $('#due_date').val();
             var startDate = $('#task_start_date').val();
@@ -654,7 +691,40 @@ $viewTaskCategoryPermission = user()->permission('view_task_category');
                         });
                 }
             });
+            let newSelection = userId.filter(val => !previousSelection.includes(val));
+            let unselected = previousSelection.filter(val => !userId.includes(val));
+            newSelection.forEach(employeeId => {
+                var employeeName = $.trim($("#selectAssignee option[value='" + employeeId + "']").text());
+                var rowHtml = `
+                    <tr id="row-${employeeId}">
+                        <td>
+                            ${employeeName}
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" name="work_hours[${employeeId}]" 
+                                   placeholder="(Optional)" required>
+                        </td>
+                    </tr>
+                `;
+                $('#work-hours-body').append(rowHtml);
+                console.log("selected");
+            });
+            unselected.forEach(removedEmployeeId => {
+                console.log("unselected")
+                $('#row-'+removedEmployeeId).remove();
+            });
+            previousSelection = userId;
+            if(!userId){
+                $('#work-hours-table').hide();
+            }else{
+                $('#work-hours-table').show();
+            }
         })
+        if(!previousSelection){
+            $('#work-hours-table').hide();
+        }else{
+            $('#work-hours-table').show();
+        }
 
         $('#save-task-form').click(function() {
             var note = document.getElementById('description').children[0].innerHTML;

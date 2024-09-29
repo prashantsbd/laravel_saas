@@ -167,6 +167,22 @@
                     </div>
                     <div class="col-md-6 show-leave"></div>
 
+                    <div class="col-md-6">
+                        <div class="form-group my-3">
+                            <table class="table table-bordered" id="work-hours-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee Name</th>
+                                        <th>Estimated Work Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="work-hours-body">
+                                    {{-- dynamically update this field --}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="col-md-12">
                         <div class="form-group my-3">
                             <x-forms.label fieldId="description" :fieldLabel="__('app.description')">
@@ -643,7 +659,7 @@
                 console.log('Error occured: ',error);
             }
         }
-
+        let previousSelection = [];
         $('#selectAssignee').change(function(){
             var dueDate = $('#due_date').val();
             var startDate = $('#task_start_date').val();
@@ -671,7 +687,34 @@
                         });
                 }
             });
+            let newSelection = userId.filter(val => !previousSelection.includes(val));
+            let unselected = previousSelection.filter(val => !userId.includes(val));
+            newSelection.forEach(employeeId => {
+                var employeeName = $.trim($("#selectAssignee option[value='" + employeeId + "']").text());
+                var rowHtml = `
+                    <tr id="row-${employeeId}">
+                        <td>
+                            ${employeeName}
+                        </td>
+                        <td>
+                            <input type="number" class="form-control" name="work_hours[${employeeId}]" 
+                                   placeholder="(Optional)" required>
+                        </td>
+                    </tr>
+                `;
+                $('#work-hours-body').append(rowHtml);
+            });
+            unselected.forEach(removedEmployeeId => {
+                $('#row-'+removedEmployeeId).remove();
+            });
+            previousSelection = userId;
+            if(!userId){
+                $('#work-hours-table').hide();
+            }else{
+                $('#work-hours-table').show();
+            }
         })
+        $('#work-hours-table').hide();
 
         $('#save-task-data-form').on('change', '#project_id', function () {
             let id = $(this).val();

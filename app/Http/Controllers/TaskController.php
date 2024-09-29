@@ -580,6 +580,7 @@ class TaskController extends AccountBaseController
         $this->task = Task::with('users', 'label', 'project', 'precedingTasks')->findOrFail($id)->withCustomFields();
         $this->dependent_tasks = $this->task->precedingTasks->pluck('id')->toArray();
         $this->taskUsers = $taskUsers = $this->task->users->pluck('id')->toArray();
+        $this->usersWorkHrs = TaskUser::select(['user_id', 'exp_work_hours'])->where('task_id', $id)->get();
         abort_403(
             !($editTaskPermission == 'all'
                 || ($editTaskPermission == 'owned' && in_array(user()->id, $taskUsers))
@@ -780,7 +781,12 @@ class TaskController extends AccountBaseController
         }
 
         // Sync task users
-        $task->users()->sync($request->user_id);
+        $work_hours = $request->work_hours;
+        $syncData = [];
+        foreach($work_hours as $userID => $hours){
+            $syncData[$userID] = ['exp_work_hours' => $hours];
+        }
+        $task->users()->sync($syncData);
         
         // sync task task dependency
         $task->precedingTasks()->sync($request->dependent_task_id);

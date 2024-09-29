@@ -163,9 +163,13 @@ class TaskObserver
             $log->logSearchEntry($task->id, $task->heading, 'tasks.edit', 'task');
 
             // Sync task users
-            if (!empty(request()->user_id) && request()->template_id == '') {
-
-                $task->users()->sync(request()->user_id);
+            if (!empty(request()->work_hours) && request()->template_id == '') {
+                $work_hours = request()->work_hours;
+                $syncData = [];
+                foreach($work_hours as $userID => $hours){
+                    $syncData[$userID] = ['exp_work_hours' => $hours];
+                }
+                $task->users()->sync($syncData);
 
             }
 
