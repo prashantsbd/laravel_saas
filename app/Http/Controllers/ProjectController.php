@@ -1912,6 +1912,7 @@ class ProjectController extends AccountBaseController
             }
         }
 
+        $link_id = 1;
         foreach ($nonMilestoneTasks as $key2 => $task) {
             $taskUsers = '<div class="d-inline-flex align-items-center ml-1 text-dark w-180" data-task-id="'.$task->id.'">';
             
@@ -1936,7 +1937,6 @@ class ProjectController extends AccountBaseController
             ];
 
             $preceding_tasks_ids = $task->precedingTasks->pluck('id')->toArray();
-            $link_id = 1;
             foreach($preceding_tasks_ids as $preceding_task_id){
                 $ganttData['links'][] = [
                     'id' => $link_id++,
