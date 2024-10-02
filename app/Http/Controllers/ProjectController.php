@@ -1935,10 +1935,12 @@ class ProjectController extends AccountBaseController
                 'view' => view('components.cards.task-card', ['task' => $task, 'draggable' => false])->render()
             ];
 
-            if (!is_null($task->dependent_task_id)) {
+            $preceding_tasks_ids = $task->precedingTasks->pluck('id')->toArray();
+            $link_id = 1;
+            foreach($preceding_tasks_ids as $preceding_task_id){
                 $ganttData['links'][] = [
-                    'id' => $task->id,
-                    'source' => $task->dependent_task_id,
+                    'id' => $link_id++,
+                    'source' => $preceding_task_id,
                     'target' => $task->id,
                     'type' => 0
                 ];
