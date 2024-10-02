@@ -1026,6 +1026,8 @@ class EmployeeController extends AccountBaseController
         $employee->employee_id = $request->employee_id;
         $employee->address = $request->address;
         $employee->hourly_rate = $request->hourly_rate;
+        $employee->daily_hrs_cap = $request->daily_hrs_cap;
+        $employee->weekly_hrs_cap = $request->weekly_hrs_cap;
         $employee->slack_username = $request->slack_username;
         $employee->department_id = $request->department;
         $employee->designation_id = $request->designation;

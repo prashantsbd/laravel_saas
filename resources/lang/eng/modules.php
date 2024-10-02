@@ -232,6 +232,8 @@ return array(
         'passwordNote' => 'Employee will login using this password.',
         'jobTitle' => 'Job Title',
         'hourlyRate' => 'Hourly Rate',
+        'dailyWorkLimit' => 'Daily work limit',
+        'weeklyWorkLimit' => 'Weekly work limit',
         'updateTitle' => 'update Employee Info',
         'updatePasswordNote' => 'Employee will login using this password. (Leave blank to keep current password)',
         'tasksDone' => 'Tasks Done',

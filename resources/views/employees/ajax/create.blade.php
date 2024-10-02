@@ -226,6 +226,34 @@ $addDepartmentPermission = user()->permission('add_department');
                     </div>
 
                     <div class="col-lg-3 col-md-6">
+                        <x-forms.label class="my-3" fieldId="daily_hrs_cap"
+                            :fieldLabel="__('modules.employees.dailyWorkLimit')"></x-forms.label>
+                        <x-forms.input-group>
+                            <x-slot name="append">
+                                <span
+                                    class="input-group-text f-14 bg-white-shade">Hrs</span>
+                            </x-slot>
+
+                            <input type="number" step=".01" min="0" class="form-control height-35 f-14"
+                                name="daily_hrs_cap" id="daily_hrs_cap">
+                        </x-forms.input-group>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <x-forms.label class="my-3" fieldId="weekly_hrs_cap"
+                            :fieldLabel="__('modules.employees.weeklyWorkLimit')"></x-forms.label>
+                        <x-forms.input-group>
+                            <x-slot name="append">
+                                <span
+                                    class="input-group-text f-14 bg-white-shade">Hrs</span>
+                            </x-slot>
+
+                            <input type="number" step=".01" min="0" class="form-control height-35 f-14"
+                                name="weekly_hrs_cap" id="weekly_hrs_cap">
+                        </x-forms.input-group>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
                         <x-forms.label class="my-3" fieldId="slack_username"
                             :fieldLabel="__('modules.employees.slackUsername')"></x-forms.label>
                         <x-forms.input-group>
