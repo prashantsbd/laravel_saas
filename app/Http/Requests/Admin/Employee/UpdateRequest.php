@@ -67,7 +67,7 @@ class UpdateRequest extends CoreRequest
             $rules['telegram_user_id'] = 'nullable|unique:users,telegram_user_id,' . $detailID->user_id.',id,company_id,' . company()->id;
         }
 
-        if((request()->daily_hrs_cap < 8) && (request()->weekly_hrs_cap < 50)){
+        if((request()->daily_hrs_cap <= 8) && (request()->weekly_hrs_cap <= 50)){
             $rules['daily_hrs_cap'] = 'nullable|numeric|min:0|max:"'. request()->weekly_hrs_cap .'"'; 
             $rules['weekly_hrs_cap'] = 'nullable|numeric|min:"'. request()->daily_hrs_cap .'"|max:50'; 
         }
