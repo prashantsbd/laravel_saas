@@ -40,6 +40,8 @@ class StoreRequest extends CoreRequest
             'email' => 'required|email:rfc,strict|unique:users,email,null,id,company_id,' . company()->id.'|max:100|check_superadmin',
             'slack_username' => 'nullable|unique:employee_details,slack_username,null,id,company_id,' . company()->id.'|max:30',
             'hourly_rate' => 'nullable|numeric',
+            'daily_hrs_cap' => 'nullable|numeric|min:0|max:8',
+            'weekly_hrs_cap' => 'nullable|numeric|min:0|max:50',
             'joining_date' => 'required',
             'last_date' => 'nullable|date_format:"' . $setting->date_format . '"|after_or_equal:joining_date',
             'date_of_birth' => 'nullable|date_format:"' . $setting->date_format . '"|before_or_equal:'.now($setting->timezone)->toDateString(),
@@ -55,6 +57,11 @@ class StoreRequest extends CoreRequest
 
         if (request()->telegram_user_id) {
             $rules['telegram_user_id'] = 'nullable|unique:users,telegram_user_id,null,id,company_id,' . company()->id;
+        }
+
+        if((request()->daily_hrs_cap < 8) && (request()->weekly_hrs_cap < 50)){
+            $rules['daily_hrs_cap'] = 'nullable|numeric|min:0|max:"'. request()->weekly_hrs_cap .'"'; 
+            $rules['weekly_hrs_cap'] = 'nullable|numeric|min:"'. request()->daily_hrs_cap .'"|max:50'; 
         }
 
         $rules = $this->customFieldRules($rules);
