@@ -77,6 +77,11 @@
                         </div>
                     </div>
 
+                    <div class="col-md-4" id="estimate_work_hrs">
+                        <x-forms.text :fieldLabel="__('modules.tasks.setTimeEstimate')" fieldName="exp_work_hrs"
+                        fieldId="exp_work_hrs" :fieldPlaceholder="__('app.optional')"/>
+                    </div>
+
                     <div class="col-md-12">
                         <x-forms.textarea class="mr-0 mr-lg-2 mr-md-2" :fieldLabel="__('app.description')"
                                           fieldName="description" fieldId="description" fieldPlaceholder="">
@@ -393,6 +398,19 @@
             } catch(error) {
                 console.log('Error occured: ',error);
             }
+        }
+
+        $('#subTaskAssignee').change(function(){
+            if($(this).val()){
+                $('#estimate_work_hrs').show();
+            }else{
+                $('#estimate_work_hrs').hide();
+            }
+        })
+        if($('#subTaskAssignee').val()){
+            $('#estimate_work_hrs').show();
+        }else{
+            $('#estimate_work_hrs').hide();
         }
 
         $('#save-subtask').click(function () {

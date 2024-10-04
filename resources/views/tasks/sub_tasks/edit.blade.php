@@ -25,6 +25,23 @@
                     :fieldValue="$subTask->due_date ? $subTask->due_date->format(company()->date_format) : ''"
                     :fieldPlaceholder="__('placeholders.date')" />
             </div>
+
+            <div class="col-md-6 col-lg-4" id="days_countBox">
+                <x-forms.text fieldId="days_count"
+                                    :fieldLabel="__('modules.projects.daysCount')" fieldName="days_count"
+                                    :fieldValue="$subTask->days_count ? $subTask->days_count : ''"
+                                    :fieldPlaceholder="__('placeholders.number')" fieldReadOnly="true"/>
+            </div>
+
+            <div class="col-md-6 col-lg-4" id="set_days_countBox">
+                <div class="form-group">
+                    <div class="mt-5 d-flex">
+                        <x-forms.checkbox fieldId="set_days_count"
+                        :fieldLabel="__('modules.projects.setDaysCount')"  fieldName="set_days_count"/>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-4">
                 <div class="form-group my-3">
                     <x-forms.label fieldId="subTaskAssignee"
@@ -44,6 +61,13 @@
                     </x-forms.input-group>
                 </div>
             </div>
+
+            <div class="col-md-4" id="estimate_work_hrs">
+                <x-forms.text :fieldLabel="__('modules.tasks.setTimeEstimate')" fieldName="exp_work_hrs"
+                :fieldValue="$subTask->exp_work_hrs ? $subTask->exp_work_hrs : ''"
+                fieldId="exp_work_hrs" :fieldPlaceholder="__('app.optional')"/>
+            </div>
+
             <div class="col-md-12">
                 <x-forms.textarea class="mr-0 mr-lg-2 mr-md-2"
                     :fieldLabel="__('app.description')" fieldName="description"
@@ -108,6 +132,19 @@
             @endif
             ...datepickerConfig
         });
+
+        $('#subTaskAssignee').change(function(){
+            if($(this).val()){
+                $('#estimate_work_hrs').show();
+            }else{
+                $('#estimate_work_hrs').hide();
+            }
+        })
+        if($('#subTaskAssignee').val()){
+            $('#estimate_work_hrs').show();
+        }else{
+            $('#estimate_work_hrs').hide();
+        }
 
         Dropzone.autoDiscover = false;
         //Dropzone class
