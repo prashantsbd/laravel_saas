@@ -416,10 +416,20 @@ class TaskObserver
         $chainTasks = $object->dependentTasks;
         foreach($chainTasks as $chainTask){
             if($object->due_date->greaterThan($chainTask->start_date)){
+                $subTasks = $chainTask->subtasks;
+                foreach($subTasks as $subTask){
+                    if($subTask->start_date && $object->due_date->greaterThan($subTask->start_date)){
+                        $subTask->start_date = $object->due_date;
+                        if($subTask->days_count){
+                            $subTask->due_date = $subTask->start_date->addDays($subTask->days_count);
+                            $subTask->saveQuietly();
+                        }
+                    }
+                }
                 $chainTask->start_date = $object->due_date;
                 $chainTask->due_date = $chainTask->start_date->addDays($chainTask->days_count);
-                $chainTask->saveQuietly();
-                $this->taskChainShift($chainTask);
+                $chainTask->save();
+                // $this->taskChainShift($chainTask); {{ this will supress the actual taskobservers to see the update made at the task }}
             }
         }
     }
