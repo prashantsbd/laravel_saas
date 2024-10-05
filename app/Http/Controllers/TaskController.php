@@ -987,6 +987,10 @@ class TaskController extends AccountBaseController
             abort_403(!in_array('timelogs', user_modules()));
             $this->tab = 'tasks.ajax.timelogs';
             break;
+        case 'gantt':
+            $this->ganttData = $this->getGanttData($this->task->id);
+            $this->tab = 'tasks.ajax.gantt_dhtml';
+            break;
         default:
             if ($this->taskSettings->files == 'yes' && in_array('client', user_roles())) {
                 $this->tab = 'tasks.ajax.files';
@@ -1183,6 +1187,42 @@ class TaskController extends AccountBaseController
 
             return $data;
         }
+    }
+
+    public function getGanttData($task_id)
+    {
+        $subtasks = SubTask::whereNotNull(['start_date', 'due_date'])
+        ->where('task_id', $task_id)->get();
+        $ganttData = [];
+        $ganttData['data'] = [];
+        $boardColumn = TaskboardColumn::where('company_id', $this->task->company_id)->get();
+        foreach ($subtasks as $key => $subtask){
+            $label_color = $boardColumn->where('column_name', ucfirst($subtask->status))->first()->label_color;
+            $subTaskUsers = '
+                <div class="d-inline-flex align-items-center ml-1 text-dark w-180" data-sub-task-id="'.$subtask->id.'">
+            ';
+            if($subtask->assigned_to){
+                $subTaskUsers = '
+                    <img data-toggle="tooltip" class="taskEmployeeImg rounded-circle mr-1" data-original-title="'.$subtask->assignedTo->name.'"
+                    src="'.$subtask->assignedTo->image_url.'">
+                ';
+            }
+            $subTaskUsers .= view('components.status', ['style' => 'color: ' . $label_color, 'value' => ucfirst($subtask->status), 'color' => 'red'])->render() . '</div>';
+            $ganttData['data'][] = [
+                'id' => $subtask->id,
+                'text' => $subtask->title,
+                'text_user' => $subTaskUsers,
+                'type' => 'sub-task',
+                'start_date' => $subtask->start_date->format('d-m-Y H:i'),
+                'duration' => $subtask->days_count,
+                'priority' => ($key + 1),
+                'color' => $label_color.'20',
+                'textColor' => '#09203F',
+                'view' => view('components.cards.sub-task-card', ['subtask' => $subtask, 'draggable' => false, 'key' => $key])->render()
+            ];
+            // 'view' ma update  key pani pathauni +1 garera
+        }
+        return $ganttData;
     }
 
 }

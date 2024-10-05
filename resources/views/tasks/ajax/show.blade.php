@@ -336,6 +336,10 @@
                                             :link="route('tasks.show', $task->id).'?view=history'">@lang('modules.tasks.history')
                                 </x-tab-item>
                             @endif
+
+                            <x-tab-item class="ajax-tab" :active="(request('view') === 'gantt')"
+                                            :link="route('tasks.show', $task->id).'?view=gantt'">@lang('modules.tasks.viewGanttChart')
+                            </x-tab-item>
                         </x-tab-section>
 
 

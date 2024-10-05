@@ -501,6 +501,7 @@ return array(
         'statusActivity' => 'Task status changed by ',
         'commentActivity' => 'Comment added by ',
         'fileActivity' => 'File is uploaded by ',
+        'viewGanttChart' => 'Gantt Chart',
         'subTaskCreateActivity' => 'Sub task is created by ',
         'subTaskUpdateActivity' => 'Sub task is updated by ',
         'history' => 'History',
