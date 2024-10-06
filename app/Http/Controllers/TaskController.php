@@ -1202,7 +1202,7 @@ class TaskController extends AccountBaseController
                 <div class="d-inline-flex align-items-center ml-1 text-dark w-180" data-sub-task-id="'.$subtask->id.'">
             ';
             if($subtask->assigned_to){
-                $subTaskUsers = '
+                $subTaskUsers .= '
                     <img data-toggle="tooltip" class="taskEmployeeImg rounded-circle mr-1" data-original-title="'.$subtask->assignedTo->name.'"
                     src="'.$subtask->assignedTo->image_url.'">
                 ';
