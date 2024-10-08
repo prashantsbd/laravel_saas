@@ -205,6 +205,10 @@ class Task extends BaseModel
         return $this->belongsToMany(Task::class, 'task_task_dependencies', 'dependent_task_id', 'preceding_task_id')->withoutGlobalScope(ActiveScope::class)->using(TaskTaskDependency::class);
     }
 
+    public function delays(): BelongsToMany
+    {
+        return $this->belongsToMany(ProjectDelay::class, 'project_delay_tasks', 'delayed_task_id', 'delay_id')->using(ProjectDelayTask::class);
+    }
     public function dependentTasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class, 'task_task_dependencies', 'preceding_task_id', 'dependent_task_id')->withoutGlobalScope(ActiveScope::class)->using(TaskTaskDependency::class);

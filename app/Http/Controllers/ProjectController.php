@@ -773,6 +773,10 @@ class ProjectController extends AccountBaseController
             return $this->tickets($this->project->project_admin == user()->id);
         case 'orders':
             return $this->orders();
+        case 'postpond':
+            $this->incompleteTasks = $this->project->tasks->where('status', '<>', 'completed');
+            $this->view = 'projects.ajax.postpond';
+            break;
         default:
             $this->taskChart = $this->taskChartData($id);
             $hoursLogged = $this->project->times()->sum('total_minutes');

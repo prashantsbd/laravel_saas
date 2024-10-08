@@ -432,6 +432,11 @@ class Project extends BaseModel
         return false;
     }
 
+    public function delays(): HasMany
+    {
+        return $this->hasMany(ProjectDelay::class, 'project_id	');
+    }
+
     public function mentionUser(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'mention_users')->withoutGlobalScope(ActiveScope::class)->using(MentionUser::class);
