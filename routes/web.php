@@ -241,6 +241,7 @@ Route::group(['middleware' => ['auth', 'multi-company-select', 'email_verified']
             Route::get('members/{id}', [ProjectController::class, 'members'])->name('projects.members');
             Route::get('pendingTasks/{id}', [ProjectController::class, 'pendingTasks'])->name('projects.pendingTasks');
             Route::get('labels/{id}', [TaskLabelController::class, 'labels'])->name('projects.labels');
+            Route::get('doingTasks/{id}', [ProjectController::class, 'doingTasks'])->name('projects.doingTasks');
 
             Route::post('project-members/save-group', [ProjectMemberController::class, 'storeGroup'])->name('project-members.store_group');
             Route::resource('project-members', ProjectMemberController::class);

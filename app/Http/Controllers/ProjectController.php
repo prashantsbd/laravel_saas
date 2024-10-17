@@ -179,6 +179,49 @@ class ProjectController extends AccountBaseController
         return Reply::success(__('messages.updateSuccess'));
     }
 
+    public function doingTasks($id, Request $request)
+    {
+        $project = Project::findOrFail($id);
+        if(!is_null($project)){
+            $doingId = TaskboardColumn::where('company_id', $project->company_id)
+                    ->where('slug', 'doing')
+                    ->value('id');
+
+            $doingTasks = Task::where('board_column_id', $doingId);
+            if($request->privilegeTasks){
+                $privilegeTaskIds = $request->privilegeTasks;
+                $allPrecedingTaskIds = $this->getPrecedingTasks($privilegeTaskIds);
+                $excludeTaskIds = array_unique(array_merge($privilegeTaskIds, $allPrecedingTaskIds));
+                $doingTasks = $doingTasks->whereNotIn('id', $excludeTaskIds);
+                $underPrivilege = Task::whereIn('id', $excludeTaskIds)
+                            ->where('status', '<>', 'completed')
+                            ->get();
+            }else{
+                $underPrivilege = null;
+            }
+            $doingTasks = $doingTasks->get();
+            $data = ['doing' => $doingTasks, 'privilege' => $underPrivilege];
+            return Reply::dataOnly(['status' => 'success', 'data' => $data]);
+        }else{
+            return Reply::dataOnly(['status' => 'success', 'data' => null]);
+        }
+    }
+
+    private function getPrecedingTasks($taskIds, &$allPrecedingTasks = [])
+    {
+        $tasks = Task::whereIn('id', $taskIds)->get();
+
+        foreach ($tasks as $task) {
+            $precedingTasks = $task->precedingTasks->pluck('id')->toArray();
+            $allPrecedingTasks = array_unique(array_merge($allPrecedingTasks, $precedingTasks));
+            if (!empty($precedingTasks)) {
+                $this->getPrecedingTasks($precedingTasks, $allPrecedingTasks);
+            }
+        }
+
+        return $allPrecedingTasks;
+    }
+
     /**
      * Remove the specified resource from storage.
      *

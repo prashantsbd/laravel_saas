@@ -32,14 +32,15 @@
                         </x-forms.input-group>
                     </div>
                     <div class="col-lg-4 col-md-4">
-                        <x-forms.select fieldId="dependent_task_id" multiple
+                        <x-forms.select fieldId="privilege_task_id" multiple
                         :fieldLabel="__('modules.projects.privilegeTask')"
-                        fieldName="dependent_task_id[]" search="true">
+                        fieldName="privilege_task_id[]" search="true">
                             @foreach ($incompleteTasks as $incompleteTask)
                             <option value="{{ $incompleteTask->id }}">{{ $incompleteTask->heading }}</option>
                             @endforeach
                         </x-forms.select>
                     </div>
+                    <div class="doing-task"></div>
                 </div> 
             </div>
         </x-form>
@@ -47,6 +48,7 @@
 </div>
 
 <script>
+    var project = @json($project);
     $(document).ready(function () {
         $('#hold_for').on('change', function() {
             if($(this).val() == 'custom'){
@@ -55,5 +57,69 @@
                 $('#custom_hold_interval').hide();
             }
         })
+        $('#privilege_task_id').on('change', loadDoingTasks);
+        $('.doing-task').on('click', 'button', function() {
+            var taskId = $(this).data('task-id');
+            var status = $(this).hasClass('todo') ? 'to_do' : 'completed';
+            var token = "{{ csrf_token() }}";
+            var url = "{{ route('tasks.change_status') }}";
+            
+            if(taskId != "" && status != ""){
+                $.easyAjax({
+                    url: url,
+                    type: "POST",
+                    container: '#postpond-project-data-form',
+                    blockUI: true,
+                    data: {
+                        _token: token,
+                        taskId: taskId,
+                        status: status,
+                        postpond: true
+                    },
+                    success: function(response) {
+                        loadDoingTasks();
+                    }
+                });
+            }
+        });
+        loadDoingTasks();
     });
+    const loadDoingTasks = () => {
+        var url = "{{ route('projects.doingTasks', ':id') }}";
+        url = url.replace(':id', project.id);
+
+        var token = "{{ csrf_token() }}";
+        var privilegeTasks = $('#privilege_task_id').val()
+
+        $.easyAjax({
+            url: url,
+            type: 'GET',
+            data: {
+                _token: token,
+                privilegeTasks: privilegeTasks
+            },
+            success: function(response) {
+                // Handle the response here
+                console.log(response);
+                console.log(privilegeTasks, response.data.doing.length);
+                var htmlContent = '';
+                if(response.data.doing.length){
+                    htmlContent += `doing tasks, mark as`
+                }else{
+                    htmlContent += `No any doing tasks`
+                }
+                response.data.doing.forEach(task => {
+                    htmlContent += `
+                        <p>${ task.heading } </p>
+                        <button class="todo" data-task-id=${ task.id }>To-Do</button>
+                        <button class="Completed" data-task-id=${ task.id }>Completed</button>`;
+                });
+                $('.doing-task').html(htmlContent);
+            },
+            error: function(xhr, status, error) {
+                // Handle the error here
+                console.error(xhr.responseText);
+            }
+        });
+    }
 </script>

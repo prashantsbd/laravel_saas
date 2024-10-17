@@ -197,12 +197,15 @@ class TaskController extends AccountBaseController
                 $this->calculateProjectProgress($task->project_id, 'true');
             }
         }
+        if(isset($request->postpond) && $request->postpond){
+            return Reply::dataOnly(['status' => 'success']);
+        }else{
+            $this->selfActiveTimer = ProjectTimeLog::selfActiveTimer();
 
-        $this->selfActiveTimer = ProjectTimeLog::selfActiveTimer();
+            $clockHtml = view('sections.timer_clock', $this->data)->render();
 
-        $clockHtml = view('sections.timer_clock', $this->data)->render();
-
-        return Reply::successWithData(__('messages.updateSuccess'), ['clockHtml' => $clockHtml]);
+            return Reply::successWithData(__('messages.updateSuccess'), ['clockHtml' => $clockHtml]);
+        }
 
     }
 
